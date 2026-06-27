@@ -25,7 +25,7 @@ public class Product {
     private String name;
     private String description;
     private double price;
-    @Min(value=1,message = "Product should be greater than 0")
+    @Min(value=0,message = "Product should be greater than 0")
     private int quantity;
     private String category;
 
