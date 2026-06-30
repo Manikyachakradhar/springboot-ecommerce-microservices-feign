@@ -1,6 +1,6 @@
-package com.ecommerce.cartservice.exception;
+package com.ecommerce.orderservice.exception;
 
-import com.ecommerce.cartservice.dto.ErrorResponse;
+import com.ecommerce.orderservice.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProductNotFound.class)
-    public ResponseEntity<ErrorResponse> productNotFoundException(ProductNotFound ex){
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ErrorResponse> productNotFoundException(ProductNotFoundException ex){
 
         ErrorResponse errorResponse= new ErrorResponse(
                 LocalDateTime.now(),

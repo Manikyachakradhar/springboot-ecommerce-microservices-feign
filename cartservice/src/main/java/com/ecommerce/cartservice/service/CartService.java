@@ -7,7 +7,9 @@ import com.ecommerce.cartservice.entity.CartItem;
 import com.ecommerce.cartservice.exception.CartNotFoundException;
 import com.ecommerce.cartservice.exception.InsufficientStockException;
 import com.ecommerce.cartservice.exception.ProductNotFound;
+import com.ecommerce.cartservice.exception.ProductServiceUnavailableException;
 import com.ecommerce.cartservice.repository.CartRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,8 @@ public class CartService {
     private final CartRepository cartRepository;
 
     @Transactional
-    public void addToCart(@Valid AddToCartRequest addToCartRequest) {
+    @CircuitBreaker(name = "productService",fallbackMethod = "addToCartFallback")
+    public String  addToCart( AddToCartRequest addToCartRequest) {
         Cart cart = cartRepository.findByUserEmail(addToCartRequest.userEmail())
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -66,6 +69,7 @@ public class CartService {
 
         cartRepository.save(cart);
 
+        return  "Cart Added Successfully";
     }
 
     public CartResponse getCart(String userEmail) {
@@ -105,7 +109,8 @@ public class CartService {
        cartRepository.save(cart);
     }
 
-    public void updateCart(@Valid UpdateCartItemRequest updateCartItemRequest) {
+    @CircuitBreaker(name = "productService", fallbackMethod = "updateCartFallback")
+    public void updateCart( UpdateCartItemRequest updateCartItemRequest) {
         Cart cart=cartRepository.findByUserEmail(updateCartItemRequest.userEmail())
                 .orElseThrow(()->new CartNotFoundException("Cart Not Found"));
 
@@ -143,5 +148,14 @@ public class CartService {
         cart.getCartItemList().clear();
         cart.setTotalAmount(0);
         cartRepository.save(cart);
+    }
+
+    public String  addToCartFallback( AddToCartRequest addToCartRequest,Throwable ex){
+
+        return "Product Service is Temporarily Unavailable";
+    }
+
+    public void updateCartFallback(UpdateCartItemRequest request, Throwable ex) {
+        throw new ProductServiceUnavailableException("Product Service is temporarily unavailable.");
     }
 }

@@ -20,9 +20,8 @@ public class CartController {
 
     @PostMapping("/add")
     public  String addToCart(@Valid @RequestBody AddToCartRequest addToCartRequest){
-        cartService.addToCart(addToCartRequest);
+        return cartService.addToCart(addToCartRequest);
 
-        return  "Cart added successfully";
     }
 
     @GetMapping("/{userEmail}")

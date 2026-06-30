@@ -10,7 +10,9 @@ import com.ecommerce.orderservice.entity.OrderStatus;
 import com.ecommerce.orderservice.exception.CartNotFoundException;
 import com.ecommerce.orderservice.exception.InsufficientStockException;
 import com.ecommerce.orderservice.exception.ProductNotFoundException;
+import com.ecommerce.orderservice.exception.ProductServiceUnavailableException;
 import com.ecommerce.orderservice.repository.OrderRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -65,7 +67,8 @@ public class OrderService {
 
 
     @Transactional
-    public void checkOut(CheckoutRequest checkoutRequest) {
+    @CircuitBreaker(name = "checkoutService",fallbackMethod = "checkoutFallback")
+    public String checkOut(CheckoutRequest checkoutRequest) {
         CartResponse cartResponse;
         try {
              cartResponse =cartClient.getCart(checkoutRequest.userEmail());
@@ -84,7 +87,7 @@ public class OrderService {
             ProductResponse productResponse;
 
             try {
-                 productResponse = productClient.getProduct(cartItemResponse.productId());
+                productResponse = productClient.getProduct(cartItemResponse.productId());
 
             } catch (HttpClientErrorException.NotFound ex) {
                 throw new ProductNotFoundException("Product Not Found");
@@ -108,6 +111,12 @@ public class OrderService {
 
         orderRepository.save(order);
        cartClient.deleteCart(checkoutRequest.userEmail());
+        return "Order Created Successfully";
 
+    }
+
+    public String checkoutFallback(CheckoutRequest request, Throwable ex) {
+        System.out.println("Circuit Breaker activated: " + ex.getMessage());
+        throw new ProductServiceUnavailableException("Check out Service is temporarily unavailable");
     }
 }

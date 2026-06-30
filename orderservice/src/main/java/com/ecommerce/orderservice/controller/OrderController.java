@@ -26,8 +26,7 @@ public class OrderController {
     }
     @PostMapping("/checkOut")
     public  String checkOut(@RequestBody CheckoutRequest checkoutRequest){
-        orderService.checkOut(checkoutRequest);
-        return "Order Created Successfully";
+        return orderService.checkOut(checkoutRequest);
     }
 
 
