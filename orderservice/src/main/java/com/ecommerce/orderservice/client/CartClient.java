@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "cart-service")
 public interface CartClient {
 
-    @GetMapping("/api/cart/{userEmail}")
-    CartResponse getCart(@PathVariable String userEmail);
+    @GetMapping("/api/cart")
+    CartResponse getCart();
 
 
-    @DeleteMapping("/api/cart/{userEmail}")
-    void deleteCart(@PathVariable String userEmail);
+    @DeleteMapping("/api/cart")
+    void deleteCart();
 
 
 

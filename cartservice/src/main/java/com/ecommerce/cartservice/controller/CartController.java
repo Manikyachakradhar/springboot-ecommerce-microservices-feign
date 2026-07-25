@@ -24,16 +24,16 @@ public class CartController {
 
     }
 
-    @GetMapping("/{userEmail}")
-    public CartResponse getCart(@PathVariable String userEmail){
-        return cartService.getCart(userEmail);
+    @GetMapping
+    public CartResponse getCart(){
+        return cartService.getCart();
 
 
     }
-    @DeleteMapping("/{userEmail}/products/{productId}")
-    public String deleteFromCart(@PathVariable String userEmail , @PathVariable  Long productId){
+    @DeleteMapping("/products/{productId}")
+    public String deleteFromCart( @PathVariable  Long productId){
 
-        cartService.deleteProductFromCarr(userEmail,productId);
+        cartService.deleteProductFromCarr(productId);
         return "Product Removed from cart";
 
     }
@@ -44,10 +44,10 @@ public class CartController {
         cartService.updateCart(updateCartItemRequest);
         return "Product Updated Successfully";
     }
-    @DeleteMapping("/{userEmail}")
-    public String clearCart(@PathVariable String userEmail){
+    @DeleteMapping
+    public String clearCart(){
 
-        cartService.clearCart(userEmail);
+        cartService.clearCart();
 
         return  "Cart Cleared successfully";
     }

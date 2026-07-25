@@ -13,6 +13,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -28,10 +29,15 @@ public class CartService {
     @Transactional
     @CircuitBreaker(name = "productService",fallbackMethod = "addToCartFallback")
     public String  addToCart( AddToCartRequest addToCartRequest) {
-        Cart cart = cartRepository.findByUserEmail(addToCartRequest.userEmail())
+
+        String userEmail = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+        Cart cart = cartRepository.findByUserEmail(userEmail)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
-                    newCart.setUserEmail(addToCartRequest.userEmail());
+                    newCart.setUserEmail(userEmail);
                     return newCart;
                 });
         ProductResponse productResponse;
@@ -72,7 +78,11 @@ public class CartService {
         return  "Cart Added Successfully";
     }
 
-    public CartResponse getCart(String userEmail) {
+    public CartResponse getCart() {
+        String userEmail = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
         Cart cart=cartRepository.findByUserEmail(userEmail)
                 .orElseThrow(()->new CartNotFoundException("Cart Not found"));
         return new CartResponse(
@@ -91,8 +101,12 @@ public class CartService {
     }
 
     @Transactional
-    public void deleteProductFromCarr(String userEmail, Long productId) {
+    public void deleteProductFromCarr(Long productId) {
 
+        String userEmail = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
        Cart cart= cartRepository.findByUserEmail(userEmail).
                orElseThrow(()->new CartNotFoundException("Cart Not Found")
        );
@@ -111,7 +125,12 @@ public class CartService {
 
     @CircuitBreaker(name = "productService", fallbackMethod = "updateCartFallback")
     public void updateCart( UpdateCartItemRequest updateCartItemRequest) {
-        Cart cart=cartRepository.findByUserEmail(updateCartItemRequest.userEmail())
+        String userEmail = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        Cart cart=cartRepository.findByUserEmail(userEmail)
                 .orElseThrow(()->new CartNotFoundException("Cart Not Found"));
 
         CartItem cartItem=cart.getCartItemList().stream()
@@ -140,7 +159,11 @@ public class CartService {
     }
 
     @Transactional
-    public void clearCart(String userEmail) {
+    public void clearCart() {
+        String userEmail = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
         Cart cart=cartRepository.findByUserEmail(userEmail).orElseThrow(()->
                 new CartNotFoundException("Cart Not Found"));
