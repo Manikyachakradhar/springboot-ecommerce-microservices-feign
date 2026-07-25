@@ -15,6 +15,7 @@ import com.ecommerce.orderservice.repository.OrderRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -69,9 +70,14 @@ public class OrderService {
     @Transactional
     @CircuitBreaker(name = "checkoutService",fallbackMethod = "checkoutFallback")
     public String checkOut(CheckoutRequest checkoutRequest) {
+
+        String userEmail = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
         CartResponse cartResponse;
         try {
-             cartResponse =cartClient.getCart(checkoutRequest.userEmail());
+             cartResponse =cartClient.getCart();
         }catch (HttpClientErrorException.NotFound ex){
             throw new CartNotFoundException("Cart not Found");
         }
@@ -110,7 +116,7 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
 
         orderRepository.save(order);
-       cartClient.deleteCart(checkoutRequest.userEmail());
+       cartClient.deleteCart();
         return "Order Created Successfully";
 
     }

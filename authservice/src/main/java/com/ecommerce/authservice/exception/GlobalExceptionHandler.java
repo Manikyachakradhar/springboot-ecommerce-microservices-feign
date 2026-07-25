@@ -1,0 +1,27 @@
+package com.ecommerce.authservice.exception;
+
+import com.ecommerce.authservice.dto.ErrorResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+@ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> userAlreadyExist(UserAlreadyExistsException ex){
+
+    ErrorResponse errorResponse= new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            ex.getMessage()
+    );
+
+    return new ResponseEntity<>(errorResponse,HttpStatus.CONFLICT);
+
+}
+}

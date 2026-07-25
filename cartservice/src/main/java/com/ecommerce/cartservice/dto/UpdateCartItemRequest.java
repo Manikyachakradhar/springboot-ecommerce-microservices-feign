@@ -8,8 +8,6 @@ import jakarta.validation.constraints.NotNull;
 public record UpdateCartItemRequest(
 
             @NotNull
-            String userEmail,
-            @NotNull
             Long productId,
 
             @Min(value = 1 ,message = "Quantity should be greater than 0")
