@@ -24,6 +24,10 @@ public class SecurityConfig {
                         .authenticated()
                         .requestMatchers(HttpMethod.POST,"/api/products/**")
                         .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/products/*/reduceStock",
+                                "/api/products/*/increaseStock")
+                        .hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/products/**")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**")

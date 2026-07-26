@@ -42,4 +42,12 @@ public class ProductController {
         service.reduceStock(id, quantity);
     }
 
+    @PutMapping("/{productId}/increaseStock")
+    public void increaseStock(
+            @PathVariable Long productId,
+            @RequestParam Integer quantity) {
+
+        service.increaseStock(productId, quantity);
+    }
+
 }

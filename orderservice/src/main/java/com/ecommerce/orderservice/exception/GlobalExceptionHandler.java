@@ -50,4 +50,35 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorResponse,HttpStatus.SERVICE_UNAVAILABLE);
     }
+    @ExceptionHandler(OrderNotFoundException.class)
+    public  ResponseEntity<ErrorResponse> orderNotFound(OrderNotFoundException ex){
+        ErrorResponse errorResponse= new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public  ResponseEntity<ErrorResponse> accessDeniedException(AccessDeniedException ex){
+        ErrorResponse errorResponse= new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
+    }
+    @ExceptionHandler(OrderCancellationException.class)
+    public ResponseEntity<ErrorResponse> handleOrderCancellation(
+            OrderCancellationException ex) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

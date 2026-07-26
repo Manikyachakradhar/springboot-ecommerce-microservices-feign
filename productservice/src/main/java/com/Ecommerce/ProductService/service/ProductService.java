@@ -76,4 +76,15 @@ public class ProductService {
 
         repository.save(product);
     }
+
+    @Transactional
+    public void increaseStock(Long productId, Integer quantity) {
+        Product product = repository.findById(productId)
+                .orElseThrow(() ->
+                        new ProductNotFoundException("Product not found"));
+
+        product.setQuantity(product.getQuantity() + quantity);
+
+        repository.save(product);
+    }
 }

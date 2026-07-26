@@ -14,6 +14,10 @@ public interface ProductClient {
     @PutMapping("/api/products/{id}/reduceStock")
     void reduceStock(@PathVariable Long id , @RequestParam int quantity);
 
+    @PutMapping("/api/products/{productId}/increaseStock")
+
+    void increaseStock(@PathVariable Long productId,@RequestParam int quantity);
+
 
 
 }
