@@ -1,0 +1,66 @@
+
+services:
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  eureka:
+    build: ./eurekaserver
+    ports:
+      - "8761:8761"
+  product-service:
+    build: ./productservice
+    ports:
+      - "8081:8081"
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - postgres
+      - eureka
+  cart-service:
+    build: ./cartservice
+    ports:
+      - "8083:8083"
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - postgres
+      - eureka
+  order-service:
+    build: ./orderservice
+    ports:
+      - "8082:8082"
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - postgres
+      - eureka
+  auth-service:
+    build: ./authservice
+    ports:
+      - "8084:8084"
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - postgres
+      - eureka
+  api-gateway:
+    build: ./apigateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka
+
+volumes:
+  postgres-data:
