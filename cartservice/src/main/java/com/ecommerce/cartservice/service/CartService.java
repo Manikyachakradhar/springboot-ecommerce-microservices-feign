@@ -9,6 +9,7 @@ import com.ecommerce.cartservice.exception.InsufficientStockException;
 import com.ecommerce.cartservice.exception.ProductNotFound;
 import com.ecommerce.cartservice.exception.ProductServiceUnavailableException;
 import com.ecommerce.cartservice.repository.CartRepository;
+import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -44,7 +45,7 @@ public class CartService {
 
              productResponse = productClient.getProduct(addToCartRequest.productId());
         }
-        catch (HttpClientErrorException.NotFound exception){
+        catch (FeignException.NotFound exception){
             throw new ProductNotFound("Product Not found");
 
         }
@@ -140,7 +141,7 @@ public class CartService {
         try {
              productResponse = productClient.getProduct(updateCartItemRequest.productId());
         }
-        catch (HttpClientErrorException ex){
+        catch (FeignException.NotFound ex){
             throw new ProductNotFound("Product Not Found");
         }
         if(productResponse.quantity()<updateCartItemRequest.quantity()){
@@ -173,11 +174,34 @@ public class CartService {
     }
 
     public String  addToCartFallback( AddToCartRequest addToCartRequest,Throwable ex){
+        if (ex instanceof ProductNotFound) {
+            throw (ProductNotFound) ex;
+        }
+        if (ex instanceof InsufficientStockException) {
+            throw (InsufficientStockException) ex;
+        }
 
-        return "Product Service is Temporarily Unavailable";
+        if (ex instanceof CartNotFoundException) {
+            throw (CartNotFoundException) ex;
+        }
+
+        throw new ProductServiceUnavailableException(
+                "Product Service is temporarily unavailable."
+        );
     }
 
     public void updateCartFallback(UpdateCartItemRequest request, Throwable ex) {
+        if (ex instanceof ProductNotFound) {
+            throw (ProductNotFound) ex;
+        }
+
+        if (ex instanceof InsufficientStockException) {
+            throw (InsufficientStockException) ex;
+        }
+
+        if (ex instanceof CartNotFoundException) {
+            throw (CartNotFoundException) ex;
+        }
         throw new ProductServiceUnavailableException("Product Service is temporarily unavailable.");
     }
 }

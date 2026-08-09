@@ -9,13 +9,12 @@
     import com.ecommerce.orderservice.entity.OrderStatus;
     import com.ecommerce.orderservice.exception.*;
     import com.ecommerce.orderservice.repository.OrderRepository;
+    import feign.FeignException;
     import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
     import jakarta.transaction.Transactional;
     import lombok.RequiredArgsConstructor;
     import org.springframework.security.core.context.SecurityContextHolder;
     import org.springframework.stereotype.Service;
-    import org.springframework.web.client.HttpClientErrorException;
-
     import java.time.LocalDateTime;
     import java.util.List;
 
@@ -81,7 +80,7 @@
             CartResponse cartResponse;
             try {
                  cartResponse =cartClient.getCart();
-            }catch (HttpClientErrorException.NotFound ex){
+            }catch (FeignException.NotFound ex){
                 throw new CartNotFoundException("Cart not Found");
             }
             if(cartResponse==null || cartResponse.cartItemResposneList().isEmpty()){
@@ -99,7 +98,7 @@
                 try {
                     productResponse = productClient.getProduct(cartItemResponse.productId());
 
-                } catch (HttpClientErrorException.NotFound ex) {
+                } catch (FeignException.NotFound ex) {
                     throw new ProductNotFoundException("Product Not Found");
                 }
                productClient.reduceStock(cartItemResponse.productId(),cartItemResponse.quantity());
@@ -127,6 +126,17 @@
         }
 
         public String checkoutFallback(Throwable ex) {
+            if (ex instanceof CartNotFoundException) {
+                throw (CartNotFoundException) ex;
+            }
+
+            if (ex instanceof ProductNotFoundException) {
+                throw (ProductNotFoundException) ex;
+            }
+
+            if (ex instanceof InsufficientStockException) {
+                throw (InsufficientStockException) ex;
+            }
             throw new ProductServiceUnavailableException("Check out Service is temporarily unavailable");
         }
 
